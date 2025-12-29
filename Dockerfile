@@ -29,8 +29,12 @@ RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - && \
     rm -rf /var/lib/apt/lists/*
 
 # 只安装 PostgreSQL 客户端（如果不需要服务端）
-RUN sh -c 'echo "deb https://apt-archive.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list' && \
-    curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /usr/share/keyrings/postgresql-keyring.gpg && \
+RUN apt-get update && \
+    apt-get install -y wget ca-certificates gnupg lsb-release && \
+    mkdir -p /usr/share/keyrings && \
+    wget -qO- https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor > /usr/share/keyrings/postgresql.gpg && \
+    echo "deb [signed-by=/usr/share/keyrings/postgresql.gpg] http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" \
+        > /etc/apt/sources.list.d/pgdg.list && \
     apt-get update && \
-    apt-get install -y  postgresql-client-14 && \
+    apt-get install -y postgresql-client-14 && \
     rm -rf /var/lib/apt/lists/*
